@@ -117,7 +117,7 @@ func (r *ReverseResponse) IsSuccess() bool { return r.Code() == "R000" }
 func (r *ReverseQueryResponse) IsSuccess() bool { return r.Code() == "R000" }
 ```
 
-- 支付回调 `PaymentNotifyResponse.IsSuccess()` 用 `transStatus == "A001"` 判断。
+- 支付回调 `PaymentNotifyResponse.IsSuccess()` 用 `transStatus == "A001"` 判断；部分通道（如支付宝 APP 支付）只下发 `tradeStatus`，此时回退读取 `tradeStatus`（`Status()` 返回最终判定值）。
 - 退款回调 `RefundNotifyResponse.IsSuccess()` 用 `tradeStatus == "A001"` 判断。
 
 也可以直接读取原始字段：

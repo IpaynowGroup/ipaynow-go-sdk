@@ -57,6 +57,18 @@ func TestIsSuccessRules(t *testing.T) {
 	if paymentNotify.IsSuccess() {
 		t.Fatal("payment notify should NOT succeed when transStatus != A001, even if responseCode=A001")
 	}
+	paymentNotify.load(map[string]string{"tradeStatus": "A001"}, "")
+	if !paymentNotify.IsSuccess() {
+		t.Fatal("payment notify should succeed on tradeStatus=A001 when transStatus is absent")
+	}
+	paymentNotify.load(map[string]string{"tradeStatus": "B001"}, "")
+	if paymentNotify.IsSuccess() {
+		t.Fatal("payment notify should NOT succeed when tradeStatus != A001")
+	}
+	paymentNotify.load(map[string]string{"transStatus": "B001", "tradeStatus": "A001"}, "")
+	if paymentNotify.IsSuccess() {
+		t.Fatal("payment notify should prefer transStatus over tradeStatus")
+	}
 
 	var refundNotify RefundNotifyResponse
 	refundNotify.load(map[string]string{"tradeStatus": "A001"}, "")

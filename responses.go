@@ -124,10 +124,25 @@ type ReverseQueryResponse struct{ Response }
 func (r *ReverseQueryResponse) IsSuccess() bool { return r.Code() == "R000" }
 
 // PaymentNotifyResponse is the N001 payment callback. isSuccess uses
-// transStatus == "A001" (spec §6), not responseCode.
+// transStatus == "A001" (spec §6), not responseCode. Some channels (e.g.
+// Alipay APP payment) send tradeStatus instead, so it is used as fallback.
 type PaymentNotifyResponse struct{ Response }
 
-func (r *PaymentNotifyResponse) IsSuccess() bool { return r.Get("transStatus") == "A001" }
+func (r *PaymentNotifyResponse) IsSuccess() bool { return r.Status() == "A001" }
+
+// TransStatus returns the transStatus field.
+func (r *PaymentNotifyResponse) TransStatus() string { return r.Get("transStatus") }
+
+// TradeStatus returns the tradeStatus field.
+func (r *PaymentNotifyResponse) TradeStatus() string { return r.Get("tradeStatus") }
+
+// Status returns transStatus, falling back to tradeStatus when absent.
+func (r *PaymentNotifyResponse) Status() string {
+	if status := r.Get("transStatus"); status != "" {
+		return status
+	}
+	return r.Get("tradeStatus")
+}
 
 // RefundNotifyResponse is the RN001 refund callback. isSuccess uses
 // tradeStatus == "A001" (spec §6), not responseCode.
